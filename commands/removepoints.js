@@ -22,7 +22,7 @@ module.exports.run = async (bot, message, args, userId, guildId, username) => {
     removePoints = userPoints - pointsAmount;
     if (Number.isInteger(parseInt(pointsAmount))) {
         serverlist.update({ "guildId": guildId, "members.id": userArrayId }, { '$set': { 'members.$.points': parseInt(removePoints) } });
-        message.channel.send("Removed " + pointsAmount + " from " + username + "s balance.");
+        message.channel.send("Removed " + pointsAmount + " from " + username + " balance.");
     }
 }
 module.exports.help = {

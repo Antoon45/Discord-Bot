@@ -3,15 +3,10 @@ const Discord = module.require("discord.js");
 const MongoClient = module.require('mongodb').MongoClient;
 
 module.exports.run = async (bot, message, args) => {
-    let guildId = (message.channel.guild.id).toString();
-    let pointsAmount = args[1];
+    const guildId = (message.channel.guild.id).toString();
+    const pointsAmount = args[1];
 
-    const errorMessage_Permission = async () => {
-        let embed = new Discord.RichEmbed()
-            .setColor("0xff0000")
-            .addField("Oh no! An error occured.", "You do not have permission to execute this command.")
-        return message.channel.send({ embed: embed });
-    }
+
 
     if (message.member.roles.some(r => ["Administrator", "UltrawideMasterRace"].includes(r.name))) {
 
@@ -30,13 +25,18 @@ module.exports.run = async (bot, message, args) => {
             let embed = new Discord.RichEmbed()
                 .setAuthor(`${message.author.username}#${message.author.discriminator}`)
                 .setColor("0x339966")
-                .addField("Points", "+" +  pointsAmount )
+                .addField("+" + pointsAmount)
             message.channel.send({ embed: embed });
-           //message.channel.send("Added " + pointsAmount + " points to " + args[0] + " balance");
         }
     } else {
         errorMessage_Permission();
         return;
+    }
+    const errorMessage_Permission = async () => {
+        let embed = new Discord.RichEmbed()
+            .setColor("0xff0000")
+            .addField("Oh no! An error occured.", "You do not have permission to execute this command.")
+        return message.channel.send({ embed: embed });
     }
 }
 module.exports.help = {

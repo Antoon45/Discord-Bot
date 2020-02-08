@@ -1,2 +1,2 @@
 @ECHO off
-start npm test
+start npm start

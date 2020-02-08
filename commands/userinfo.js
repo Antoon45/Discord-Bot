@@ -9,7 +9,7 @@ module.exports.run = async (bot, message, args) => {
     let embed = new Discord.RichEmbed()
         .setAuthor(`${message.author.username}#${message.author.discriminator}`)
         .setColor("0x666699")
-        .setThumbnail(message.author.avatarURL)
+        .setThumbnail(avatar)
         .addField("ID", `${message.author.id}`)
         .addField("Joined Discord", `${userCreatedDate.getUTCDay() + "/" + (userCreatedDate.getMonth() + 1) + "/" + userCreatedDate.getFullYear()}` + " - " + `${userCreatedTime.getHours() + ":" + userCreatedTime.getMinutes()}`)
     message.channel.send({ embed: embed });

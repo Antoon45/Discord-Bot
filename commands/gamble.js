@@ -12,10 +12,11 @@ module.exports.run = async (bot, message, args, userId, guildId, username) => {
     const calc = async () => {
         sum = userPoints - args[0];
         if (gambleNumber > userPoints) {
-            message.channel.send("You don't have enough points to gamble");
-        } else if (chance < 70) {
+            errorMessage();
+            return;
+        } else if (chance < 80) {
             message.channel.send(user + " rolled a " + chance + " and lost 😔 " + args[0] + " points and now has " + sum + " points");
-        } else if (chance >= 70 && chance <= 90) {
+        } else if (chance >= 80 && chance <= 95) {
             x2 = args[0] * 2;
             sum = userPoints + x2;
             message.channel.send(user + " rolled a " + chance + " and won 2x " + args[0] + " points and now has " + sum + " points 🤑 ");
@@ -30,7 +31,7 @@ module.exports.run = async (bot, message, args, userId, guildId, username) => {
     const errorMessage = async () => {
         let embed = new Discord.RichEmbed()
             .setColor("0xff0000")
-            .addField("Uh oh! An error occured.", "Correct usage: !gamble 50 or more")
+            .addField("Uh oh! An error occured.", "Correct usage: !gamble 50 or you don't have enough points")
         message.channel.send({ embed: embed });
     }
 

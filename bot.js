@@ -34,94 +34,88 @@ fs.readdir("./commands/", (err, files) => {
 
 /** Status constants */
 const STATUS = {
-	ONLINE: 'online',
-	OFFLINE: 'offline',
-	AWAY: 'idle',
-	DND: 'dnd'
+    ONLINE: 'online',
+    OFFLINE: 'offline',
+    AWAY: 'idle',
+    DND: 'dnd'
 }
 
-    bot.on('ready', async () => {
+bot.on('ready', async () => {
 
-
-        
-        try {
-            let link = await bot.generateInvite(["ADMINISTRATOR"]);
-            console.log(link)
-        } catch (e) {
-            console.log(e.stack)
-        }
-    
-            
-        const createGuild = async (guild) => {
-            const _createMemberInGuild = async (guildId, memberId) => {
-                const structure = {
-                    /** Member structure */
-                    id: memberId,
-                    points: 0, // initital points
-                    wins: 0 // initital wins
-                }
-                await serverlist.update({ guildId: guildId, 'members.id': { $ne: memberId } }, { $addToSet: { members: structure } });
-            }
-    
+    try {
+        let link = await bot.generateInvite(["ADMINISTRATOR"]);
+        console.log(link)
+    } catch (e) {
+        console.log(e.stack)
+    }
+    const createGuild = async (guild) => {
+        const _createMemberInGuild = async (guildId, memberId) => {
             const structure = {
-                /** Guild structure */
-                id: guild.id,
-                lottery: {},
-                members: []
+                /** Member structure */
+                id: memberId,
+                points: 0, // initital points
+                wins: 0 // initital wins
             }
-            /** Create guild */
-            await serverlist.update({ guildId: guild.id }, { $setOnInsert: structure }, { upsert: true });
-    
-            /** Create each member of guild */
-            await Promise.all(guild.members.map(async (member) => {
-                await _createMemberInGuild(guild.id, member.id);
-            }));
+            await serverlist.update({ guildId: guildId, 'members.id': { $ne: memberId } }, { $addToSet: { members: structure } });
         }
 
-        console.log(`${bot.user.username}: Successfully Connected`);
-        //console.log(bot.guilds.find().toString());
-        bot.user.setPresence({ game: { name: "!commands", type: 0 } });
-
-
-
-        try {
-            await Promise.all(bot.guilds.map(async (guild) => {
-                await createGuild(guild);
-            }));
-        } catch (e) {
+        const structure = {
+            /** Guild structure */
+            id: guild.id,
+            lottery: {},
+            members: []
         }
+        /** Create guild */
+        await serverlist.update({ guildId: guild.id }, { $setOnInsert: structure }, { upsert: true });
 
-        setInterval(async () => {
-            /** Check presence every 1 second */
-            bot.guilds.forEach(guild => {
-                checkPresence(guild);
-            });
-        }, 300000);
+        /** Create each member of guild */
+        await Promise.all(guild.members.map(async (member) => {
+            await _createMemberInGuild(guild.id, member.id);
+        }));
+    }
 
-        let res = serverlist.find({});
-        //res.forEach(r => console.log(r));
-        
-        const checkPresence = async (guild) => {
-            guild.members.forEach(member => {
-                if (member.presence.status === STATUS.ONLINE) {
-                    serverlist.update({ guildId: guild.id, 'members.id': member.id }, { $inc: { 'members.$.points': 100 } });
-                }
-            });
-        }
+    console.log(`${bot.user.username}: Successfully Connected`);
+    //console.log(bot.guilds.find().toString());
+    bot.user.setPresence({ game: { name: "!commands", type: 0 } });
 
-    });
+    try {
+        await Promise.all(bot.guilds.map(async (guild) => {
+            await createGuild(guild);
+        }));
+    } catch (e) {
+    }
+
+    setInterval(async () => {
+        /** Check presence every 1 second */
+        bot.guilds.forEach(guild => {
+            checkPresence(guild);
+        });
+    }, 20000);
+
+    //let res = serverlist.find({});
+    //res.forEach(r => console.log(r));
+
+    const checkPresence = async (guild) => {
+        guild.members.forEach(member => {
+            if (member.presence.status === STATUS.ONLINE) {
+                serverlist.update({ guildId: guild.id, 'members.id': member.id }, { $inc: { 'members.$.points': 100 } });
+            }
+        });
+    }
+
+});
 
 bot.on("disconnected", function () { process.exit(1); });
 bot.on("message", async message => {
 
-    let username = message.author.username;
-    let userId = (message.author.id).toString();
-    let guildId = (message.channel.guild.id).toString();
+    const username = message.author.username;
+    const userId = (message.author.id).toString();
+    const guildId = (message.channel.guild.id).toString();
 
-    let checkIfBot = message.author.bot;
-    let messageArray = message.content.split(/\s+/g);
-    let command = messageArray[0];
-    let args = messageArray.slice(1);
+    const checkIfBot = message.author.bot;
+    const messageArray = message.content.split(/\s+/g);
+    const command = messageArray[0];
+    const args = messageArray.slice(1);
 
 
     let cmd = bot.commands.get(command.slice(prefix.length))
