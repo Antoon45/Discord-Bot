@@ -1,13 +1,13 @@
 const botConfig = module.require("./botConfig.json");
 const Discord = module.require("discord.js");
 const fs = module.require("fs");
-
+const dotenv = require('dotenv').config();
 const prefix = botConfig.prefix;
+const MongoClient = require('mongodb').MongoClient;
 
 const bot = new Discord.Client();
 bot.commands = new Discord.Collection();
 
-const MongoClient = require('mongodb').MongoClient;
 MongoClient.connect("mongodb://localhost:27017", async (err, server) => {
     if (err) { console.log("Could not connect to mongodb"); return; }
     const db = server.db('Nenonen');
@@ -51,24 +51,24 @@ bot.on('ready', async () => {
     const createGuild = async (guild) => {
         const _createMemberInGuild = async (guildId, memberId) => {
             const structure = {
-                /** Member structure */
+                /* Member structure */
                 id: memberId,
                 points: 0, // initital points
                 wins: 0 // initital wins
             }
-            await serverlist.update({ guildId: guildId, 'members.id': { $ne: memberId } }, { $addToSet: { members: structure } });
+            await serverlist.updateMany({ guildId: guildId, 'members.id': { $ne: memberId } }, { $addToSet: { members: structure } });
         }
 
         const structure = {
-            /** Guild structure */
+            /* Guild structure */
             id: guild.id,
             lottery: {},
             members: []
         }
-        /** Create guild */
-        await serverlist.update({ guildId: guild.id }, { $setOnInsert: structure }, { upsert: true });
+        /* Create guild */
+        await serverlist.updateMany({ guildId: guild.id }, { $setOnInsert: structure }, { upsert: true });
 
-        /** Create each member of guild */
+        /* Create each member of guild */
         await Promise.all(guild.members.map(async (member) => {
             await _createMemberInGuild(guild.id, member.id);
         }));
@@ -98,7 +98,7 @@ bot.on('ready', async () => {
     const checkPresence = async (guild) => {
         guild.members.forEach(member => {
             if (member.presence.status === STATUS.ONLINE) {
-                serverlist.update({ guildId: guild.id, 'members.id': member.id }, { $inc: { 'members.$.points': 100 } });
+                serverlist.updateMany({ guildId: guild.id, 'members.id': member.id }, { $inc: { 'members.$.points': 100 } });
             }
         });
     }
@@ -125,4 +125,4 @@ bot.on("message", async message => {
     if (message.channel.type === "dm") return;
 });
 
-bot.login(botConfig.token);
+bot.login(process.env.TOKEN);
